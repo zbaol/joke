@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <style>
+        *{
+            padding:0;
+            margin: 0;
+        }
+        body{
+            background:#f3f3f3;
+        }
+        ul{
+            padding:0;
+            margin: 0;
+            list-style:none;
+        }
+        .container{
+            width: 1200px;
+            margin:0 auto;
+        }
+        .header{
+            height:60px;
+            background:#e50541;
+        }
+        .logo{
+            float:left;
+        }
+        .header ul{
+            float:left;
+            padding-left:30px;
+        }
+        .header li{
+            width:62px;
+            margin:0 15px;
+            line-height:60px;
+            font-size:18px;
+            color:#fff;
+            text-align:center;
+            float:left;
+        }
+        .header li a{
+            color:#fff;
+            text-decoration:none;
+        }
+        .header li.on{
+            background:#a0032d;
+        }
+        .con{
+            width:708px;
+            float:left;
+            border:1px solid #e8e8e8;
+            background:#fff;
+            padding:20px;
+        }
+        .list{
+            border-bottom:1px solid #666;
+        }
+        .fr{
+            float:right;
+        }
+        .fl{
+            float:left;
+        }
+        .list h4{
+            line-height:30px;
+            font-weight:normal;
+            padding-bottom:15px;
+            border-bottom:1px solid #888;
+        }
+        .list h4 img{
+            width: 30px;
+            height: 30px;
+            border-radius:50%;
+            float:left;
+            margin-right:10px;
+        }
+        .timer{
+            font-size:14px;
+            color:#888;
+            float:right;
+        }
+        .txt{
+            line-height:32px;
+            color:#888;
+            padding:15px;
+        }
+        .txt img{
+            width:100%;
+        }
+        .info{
+            height:50px;
+            line-height:50px;
+        }
+        .bdsharebuttonbox{
+            display:inline-block;
+        }
+        .loading{
+            width: 200px;
+            height: 200px;
+            position:absolute;
+            top:30%;
+            left:30%;
+        }
+        .btn{
+            width: 820px;
+            height: 70px;
+            margin-left: 420px;
+        }
+        button{
+          width: 50px;
+          height: 30px;
+          margin:20px 5px 20px 5px;
+        }
+        .prev{
+          position: absolute;
+          left: 360px;
+          top: 60px;
+        }
+        .next{
+          position: absolute;
+          left: 1025px;
+          top: 60px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <img src="img/logo_new.png" class="logo" />
+            <ul class="nav">
+                <li class="on" data-type="1"><a href="##" >全部</a></li>
+                <li data-type="2"><a href="##">文字</a></li>
+                <li data-type="3"><a href="##">图片</a></li>
+                <li data-type="4"><a href="##">视频</a></li>
+                <li data-type="5"><a href="##">推荐</a></li>
+            </ul>
+        </div>
+    </div>
+    <button class="prev">上一页</button>
+    <div class="btn"></div>
+    <button class="next">下一页</button>
+    <div class="container">
+      <img src="img/loading.gif" class="loading">
+      <div class="con">
+ 
+      </div>
+    </div>
+<script src="jquery/jquery.min.js"></script>
+<script></script>
+<script>
+    $(function(){
+        //请求类型为什么的数据
+        var type = 1;
+        //请求第几页数据
+        var page = 1;
+        $(".nav>li").click(function(){
+            $(this).addClass("on").siblings().removeClass("on");
+            type = parseInt($(this).attr("data-type"));
+            getData();
+        })
+        getData();
+       //添加按钮
+       var btn="";
+       for(var i=1;i<=10;i++){
+         btn+="<button>"+i+"</button>";
+       }
+       $(".btn").html(btn);
+       for(var j=0;j<$(".btn :button").length;j++){
+          $(".btn :button")[j].index=j;
+          $(".btn :button").click(function(){
+             page=this.index+1;
+             console.log(page);
+             getData();
+             $(".prev").click(function(){
+                page--;
+                $(".next").removeProp("disabled");
+                if(page==-1){
+                  $(".prev").prop("disabled","disabled");
+                }
+                getData();
+             })
+             $(".next").click(function(){
+                page++;
+                $(".prev").removeProp("disabled");
+                if(page==11){
+                   $(".next").prop("disabled","disabled"); 
+                }
+                getData();
+             })
+          })
+       }
+
+       //获得数据的函数
+        function getData(){
+            $(".con").html("");
+            $(".loading").show();
+            $.ajax({
+                url:"https://www.apiopen.top/satinApi?type="+ type +"&page=" + page,
+                type:"GET",
+                datatype:"jsonp",
+                jsonp:"callback",
+                success:function(abc){
+                    if(abc.code == 200){
+                        $(".loading").hide();
+                        var list = abc.data;
+                        var divs = "";
+                        for(var i=0;i<list.length;i++){
+                            //大的包裹div
+                            divs += "<div class='list'>";
+                            //标题h4
+                            divs += "<h4>";
+                            //头像和名字
+                            divs += "<span>";
+                            if(list[i].profile_image){
+                                divs += "<img src='"+ list[i].profile_image +"' />"
+                            }else{
+                                divs += "<img src='http://placehold.it/30X30' />"
+                            }
+                            divs += list[i].name;
+                            divs += "</span>";
+                            //时间
+                            divs += "<span class='timer'>"+ list[i].created_at +"</span>"
+                            divs += "</h4>";
+                            //文字和图片、视频
+                            divs += "<div class='txt'>";
+                            divs += "<p>"+ list[i].text +"</p>";
+                            //如果是图片段子
+                            if(list[i].type == 10){
+                                divs += "<p>";
+                                divs += "<img src='"+ list[i].image1 +"' />"
+                                divs += "</p>";
+                            }
+                            //如果是视频
+                            if(list[i].type == 41){
+                                divs += "<p>";
+                                divs += "<video src='"+ list[i].videouri +"' controls width='707'></video>"
+                                divs += "</p>";
+                            }
+                            //如果是声音
+                            if(list[i].type == 31){
+                                divs += "<p>";
+                                divs += "<audio src='"+ list[i].voiceuri +"' controls></audio>"
+                                divs += "</p>";
+                            }
+                            divs += "</div>";
+                            //点赞、评论、踩
+                            divs += "<div class='info'>";
+                            //点赞
+                            divs += "<span>点赞："+ list[i].ding +"</span>";
+                            //踩
+                            divs += "<span>踩："+ list[i].cai +"</span>";
+                            //评论
+                            divs += "<span>评论："+ list[i].comment +"</span>";
+                            divs += "</div>";
+                            divs += "</div>";
+                        }
+                        $(".con").html(divs);
+                    }
+                }
+            })
+        }
+    })
+
+</script>
+</body>
+</html>
